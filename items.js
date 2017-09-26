@@ -193,18 +193,15 @@ function ItemDAO(database) {
          *
          */
 
-        var item = this.createDummyItem();
-        var items = [];
-        for (var i=0; i<5; i++) {
-            items.push(item);
-        }
-
+        this.db.collection("item").find({ $text: { $search: query } }).skip(page * itemsPerPage).limit(itemsPerPage).toArray(function(err, list) {
+            callback(list);
+        });
         // TODO-lab2A Replace all code above (in this method).
 
         // TODO Include the following line in the appropriate
         // place within your code to pass the items for the selected page
         // of search results to the callback.
-        callback(items);
+        // callback(items);
     }
 
 
@@ -226,7 +223,13 @@ function ItemDAO(database) {
         * simply do this in the mongo shell.
         */
 
-        callback(numItems);
+        this.db.collection("item").aggregate([
+            { $match: { $text: { $search: query } } },
+            { $project: { _id: 0,  title: 1} },
+            { $group: { _id: "$title", num: { $sum: 1 } } }
+        ]).toArray(function(err, list) {
+            callback(list.length);
+        });
     }
 
 
@@ -243,14 +246,16 @@ function ItemDAO(database) {
          *
          */
 
-        var item = this.createDummyItem();
+        this.db.collection("item").find({ _id: itemId }).toArray(function(err, list) {
+            callback(list[0]);
+        });
 
         // TODO-lab3 Replace all code above (in this method).
 
         // TODO Include the following line in the appropriate
         // place within your code to pass the matching item
         // to the callback.
-        callback(item);
+        // callback(item);
     }
 
 
@@ -290,13 +295,17 @@ function ItemDAO(database) {
 
         // TODO replace the following two lines with your code that will
         // update the document with a new review.
-        var doc = this.createDummyItem();
-        doc.reviews = [reviewDoc];
+        // var doc = this.createDummyItem();
+        // doc.reviews = [reviewDoc];
+
+        this.db.collection("item").update({ _id: itemId }, { $push: { reviews: reviewDoc } }, function(err, result) {
+            console.log(result);
+        });
 
         // TODO Include the following line in the appropriate
         // place within your code to pass the updated doc to the
         // callback.
-        callback(doc);
+        // callback(doc);
     }
 
 
