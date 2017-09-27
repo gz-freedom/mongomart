@@ -298,7 +298,7 @@ function ItemDAO(database) {
         // var doc = this.createDummyItem();
         // doc.reviews = [reviewDoc];
 
-        this.db.collection("item").update({ _id: itemId }, { $push: { reviews: reviewDoc } }, function(err, result) {
+        this.db.collection("item").update({ _id: itemId }, { $push: { reviews: reviewDoc } }).then(function(result) {
             console.log(result);
         });
 

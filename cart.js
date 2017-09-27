@@ -86,7 +86,18 @@ function CartDAO(database) {
          *
          */
 
-        callback(null);
+        //callback(null);
+
+        this.db.collection("cart").find({
+            userId: userId,
+            "items._id": itemId
+        }, {"items.$": 1}).toArray(function(err, result) {
+            if(result.length === 0) {
+                callback(null);
+            } else {
+                callback(result[0].items[0]);
+            }
+        });
 
         // TODO-lab6 Replace all code above (in this method).
     }
@@ -178,14 +189,13 @@ function CartDAO(database) {
         *
         */
 
-        var userCart = {
+        this.db.collection("cart").find({
             userId: userId,
-            items: []
-        }
-        var dummyItem = this.createDummyItem();
-        dummyItem.quantity = quantity;
-        userCart.items.push(dummyItem);
-        callback(userCart);
+            "items._id": itemId
+        }, { "items.$": 1 }).next(function(err, result) {
+            result.items[0].quantity = quantity;
+            callback(result);
+        });
 
         // TODO-lab7 Replace all code above (in this method).
 
